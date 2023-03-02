@@ -22,10 +22,33 @@ export const Pending = memo(() => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [results, setResults] = useState([]);
 
+  const apiUrl = "https://api.apify.com/v2/acts/baa1~ingredion/run-sync-get-dataset-items?token=apify_api_RAQ3OtcSEPg2FdR0dLg6onHzTreXDY3KTfO1"
+
   const fetchData = async () => {
-    const response = await axios.post(API_URL, arrays);
+    try {
+      const responses = await Promise.all(arrays.map(arr => {
+        if(arr.website)
+          return axios.post(apiUrl, {startUrls: [{url: arr.website}]});
+        else
+          return 0;
+      }
+      ));
+      if(responses[0])
+        results.push({title: arrays[0].title, company: arrays[0].company, brand: arrays[0].brand, brandLists: responses[0].data});
+      if(responses[1])
+        results.push({title: arrays[1].title, company: arrays[1].company, brand: arrays[1].brand, brandLists: responses[1].data});
+      if(responses[2])
+        results.push({title: arrays[2].title, company: arrays[2].company, brand: arrays[2].brand, brandLists: responses[2].data});
+    } catch(err) {
+      console.log(err)
+    }
+    // await axios.post(API_URL, results)
     setIsLoaded(true);
-    setResults(response.data);
+    console.log('results',results);
+    
+    // const response = await axios.post(API_URL, arrays);
+    // setIsLoaded(true);
+    // setResults(response.data);
   }
 
   useEffect(() => {
