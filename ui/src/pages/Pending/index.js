@@ -10,7 +10,11 @@ export const Pending = memo(() => {
 
   // const apiURI = process.env.REACT_APP_API_URL;
 
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://baabrandsearch1.herokuapp.com/api/brands"
+    : "http://localhost:80/api/brands";
+  // const API_URL = process.env.REACT_APP_API_URL;
   console.log("api-url", API_URL)
   const location = useLocation();
   const arrays = location.state;
@@ -19,7 +23,7 @@ export const Pending = memo(() => {
   const [results, setResults] = useState([]);
 
   const fetchData = async () => {
-    const response = await axios.post('https://baabrandsearch1.herokuapp.com/api/brands', arrays);
+    const response = await axios.post(API_URL, arrays);
     setIsLoaded(true);
     setResults(response.data);
   }
