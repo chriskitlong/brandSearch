@@ -1,6 +1,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const path = require('path');
+require('dotenv').config({
+  path: '../.env'
+});
 
 const app = express();
 
@@ -10,6 +14,7 @@ var corsOptions = {
 
 app.use(cors());
 
+app.use(express.static(path.join(__dirname, '../ui/build')))
 // parse requests of content-type - application/json
 app.use(bodyParser.json());
 
@@ -28,6 +33,9 @@ app.get("/", (req, res) => {
 
 require("./app/routes/brand.routes")(app);
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname + '/../ui/build/index.html'))
+})
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

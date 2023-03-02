@@ -8,7 +8,12 @@ export const Pending = memo(() => {
 
   const navigate = useNavigate();
 
-  const apiURI = process.env.REACT_APP_API_URL;
+  // const apiURI = process.env.REACT_APP_API_URL;
+
+  const API_URL =
+    process.env.NODE_ENV === "production"
+      ? "YOUR_APP_URL"
+      : "http://localhost:8000";
 
   const location = useLocation();
   const arrays = location.state;
