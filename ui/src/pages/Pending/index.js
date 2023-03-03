@@ -42,10 +42,10 @@ export const Pending = memo(() => {
     } catch(err) {
       console.log(err)
     }
-    // await axios.post(API_URL, results)
+    await axios.post(API_URL, results)
     setIsLoaded(true);
     console.log('results',results);
-    
+
     // const response = await axios.post(API_URL, arrays);
     // setIsLoaded(true);
     // setResults(response.data);
