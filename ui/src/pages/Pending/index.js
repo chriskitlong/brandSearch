@@ -26,13 +26,41 @@ export const Pending = memo(() => {
 
   const fetchData = async () => {
     try {
-      const responses = await Promise.all(arrays.map(arr => {
+      let responses = await Promise.all(arrays.map(arr => {
         if(arr.website)
           return axios.post(apiUrl, {startUrls: [{url: arr.website}]});
         else
           return 0;
       }
       ));
+      console.log("before processing", responses)
+      await Promise.all(responses.map(response => {
+        const resultArray = [];
+        const regex = /[®™]/g;
+        response.data?.map(item => {
+          item.term = item.term.toUpperCase();
+          item.term = item.term.replace(/^-/, '');
+          return item;
+        })
+        response.data?.map(item => {
+          if(resultArray.find(object => {
+            if(object.term.replace(regex, '') === item.term.replace(regex, '')){
+              object.count +=item.count;
+              return true;
+            }
+            else {
+              return false;
+            }
+          })) {} else {
+            resultArray.push(item);
+          }
+        })
+        console.log("resultArrray", resultArray)
+        if(response.data)
+          response.data = resultArray;
+        return response;
+      }))
+      console.log("after processing",responses)
       if(responses[0])
         results.push({title: arrays[0].title, company: arrays[0].company, brand: arrays[0].brand, brandLists: responses[0].data});
       if(responses[1])
@@ -42,9 +70,10 @@ export const Pending = memo(() => {
     } catch(err) {
       console.log(err)
     }
+    console.log('results',results);
+
     await axios.post(API_URL, results)
     setIsLoaded(true);
-    console.log('results',results);
 
     // const response = await axios.post(API_URL, arrays);
     // setIsLoaded(true);
