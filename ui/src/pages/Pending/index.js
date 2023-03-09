@@ -24,22 +24,41 @@ export const Pending = memo(() => {
 
   const apiUrl = "https://api.apify.com/v2/acts/baa1~ingredion/run-sync-get-dataset-items?token=apify_api_RAQ3OtcSEPg2FdR0dLg6onHzTreXDY3KTfO1"
 
+  const isValidUrl = urlString=> {
+    var urlPattern = new RegExp('^(https?:\\/\\/)?'+ // validate protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // validate domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // validate OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // validate port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // validate query string
+    '(\\#[-a-z\\d_]*)?$','i'); // validate fragment locator
+    return !!urlPattern.test(urlString);
+  }
   const fetchData = async () => {
     try {
       let responses = await Promise.all(arrays.map(arr => {
-        if(arr.website)
+        if(arr.website) {
+          // if(isValidUrl(arr.website))
+          if(!arr.website.includes('https://'))
+            arr.website = "https://" + arr.website;
           return axios.post(apiUrl, {startUrls: [{url: arr.website}]});
+        }
         else
           return 0;
       }
       ));
+      responses.forEach(response => {
+        if(response) {
+          response.data = response.data.sort((a, b) => (a.count < b.count)? 1 : (a.count === b.count) ? 1 : -1);
+          return response
+        }
+      });
       console.log("before processing", responses)
       await Promise.all(responses.map(response => {
         const resultArray = [];
         const regex = /[®™]/g;
         response.data?.map(item => {
           item.term = item.term.toUpperCase();
-          item.term = item.term.replace(/^-/, '');
+          item.term = item.term.replaceAll(' ', '');
           return item;
         })
         response.data?.map(item => {
@@ -48,9 +67,7 @@ export const Pending = memo(() => {
               object.count +=item.count;
               return true;
             }
-            else {
-              return false;
-            }
+            else return false;
           })) {} else {
             resultArray.push(item);
           }
